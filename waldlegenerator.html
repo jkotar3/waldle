@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waldle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        canvas {
+            border: 2px solid #333;
+        }
+        #puzzle-info {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div id="winScreen" style="display: none;">
+        <h1>Congratulations!</h1>
+        <p>You found Waldo in </p>
+        <p id="time"></p>
+          <p> seconds!</p>
+    </div>
+
+    <script>
+        // JavaScript for game logic will go here
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const gridSize = 50; // Size of each grid cell
+const numColumns = Math.floor(canvas.width / gridSize);
+const numRows = Math.floor(canvas.height / gridSize);
+const grid = Array(numRows).fill().map(() => Array(numColumns).fill(false)); // Initialize grid with false values (unoccupied)
+
+// Function to draw an image on the canvas
+function drawImage(image, x, y) {
+    ctx.drawImage(image, x, y, gridSize, gridSize);
+}
+
+function isInsideRect(x, y, rectX, rectY, rectWidth, rectHeight) {
+    return x >= rectX && x <= rectX + rectWidth && y >= rectY && y <= rectY + rectHeight;
+}
+
+const d = new Date();
+const startTime = d.getTime();
+
+// Load Waldo sprite
+const waldoImage = new Image();
+waldoImage.src = 'https://i.ibb.co/Gdk7CJp/waldo-4.jpg';
+let waldX, waldY;
+do {
+    waldX = Math.floor(Math.random() * numColumns);
+    waldY = Math.floor(Math.random() * numRows);
+} while (grid[waldY][waldX]);
+grid[waldY][waldX] = true; // Mark cell as occupied by Waldo
+waldoImage.onload = () => {
+    drawImage(waldoImage, waldX * gridSize, waldY * gridSize); // Draw Waldo
+    canvas.addEventListener('click', handleClick);
+};
+
+// Load other character sprites
+const otherCharacters = ['https://i.ibb.co/D81jnmk/wilma.jpg', 'https://i.ibb.co/CKfZ5Kn/waldo-1.jpg', 'https://i.ibb.co/P9YSg37/waldo-2.jpg', 'https://i.ibb.co/db1SV6b/waldo-3.jpg'];
+
+// otherCharacters.forEach((imageUrl) => {
+//     const image = new Image();
+//     image.src = imageUrl;
+//     image.onload = () => {
+//         let x, y;
+//         do {
+//             x = Math.floor(Math.random() * numColumns);
+//             y = Math.floor(Math.random() * numRows);
+//         } while (grid[y][x]);
+//         grid[y][x] = true; // Mark cell as occupied by character
+//         drawImage(image, x * gridSize, y * gridSize); // Draw other characters
+//     };
+// });
+otherCharacters.forEach((imageUrl) => {
+    const image = new Image();
+    image.src = imageUrl;
+    image.onload = () => {
+        for (let i = 0; i < 47; i++) {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * numColumns);
+                y = Math.floor(Math.random() * numRows);
+            } while (grid[y][x]);
+            grid[y][x] = true; // Mark cell as occupied by other thing
+            drawImage(image, x * gridSize, y * gridSize); // Draw other things
+        }
+    };
+});
+// Load other things sprites
+// const otherThings = ['https://i.ibb.co/fFRsk3m/barberpole.jpg', 'https://i.ibb.co/whYqt3C/candycane.jpg'];
+
+// otherThings.forEach((imageUrl) => {
+//     const image = new Image();
+//     image.src = imageUrl;
+//     image.onload = () => {
+//         for (let i = 0; i < 381; i++) {
+//             let x, y;
+//             do {
+//                 x = Math.floor(Math.random() * numColumns);
+//                 y = Math.floor(Math.random() * numRows);
+//             } while (grid[y][x]);
+//             grid[y][x] = true; // Mark cell as occupied by other thing
+//             drawImage(image, x * gridSize, y * gridSize); // Draw other things
+//         }
+//     };
+// });
+
+// Add click event listener to canvas
+function handleClick(event) {
+    const rect = canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+
+    // Check if the click occurred on Waldo's position
+    if (isInsideRect(clickX, clickY, waldX * gridSize, waldY * gridSize, gridSize, gridSize)) {
+        // Display win screen
+        document.getElementById('winScreen').style.display = 'block';
+        const d2 = new Date();
+        const endTime = d2.getTime();
+        const timeElapsed = (endTime - startTime) / 1000;
+        document.getElementById("time").innerHTML = timeElapsed.toFixed(2);
+        // Remove click event listener
+        canvas.removeEventListener('click', handleClick);
+    }
+}
+
+
+    </script>
+</body>
+</html>
